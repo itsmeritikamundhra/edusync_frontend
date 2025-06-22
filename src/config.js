@@ -1,2 +1,2 @@
-export const API_URL = "https://edu-sync-backend-ggenhqd2b3e8ahcu.japaneast-01.azurewebsites.net/api";
+  export const API_URL = process.env.REACT_APP_API_BASE_URL;
 // You can add other configuration variables here in the future 
