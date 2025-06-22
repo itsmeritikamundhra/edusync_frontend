@@ -75,15 +75,15 @@ const EditCourse = () => {
 
     // Validate lengths before submitting
     if (course.title.length > TITLE_MAX_LENGTH) {
-      setError(`Title must be ${TITLE_MAX_LENGTH} characters or less`);
+      setError('Title must be ${TITLE_MAX_LENGTH} characters or less');
       return;
     }
     if (course.description.length > DESCRIPTION_MAX_LENGTH) {
-      setError(`Description must be ${DESCRIPTION_MAX_LENGTH} characters or less. Current length: ${course.description.length}`);
+      setError('Description must be ${DESCRIPTION_MAX_LENGTH} characters or less. Current length: ${course.description.length}');
       return;
     }
     if (course.mediaUrl.length > MEDIA_URL_MAX_LENGTH) {
-      setError(`Media URL must be ${MEDIA_URL_MAX_LENGTH} characters or less`);
+      setError('Media URL must be ${MEDIA_URL_MAX_LENGTH} characters or less');
       return;
     }
 

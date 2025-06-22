@@ -194,11 +194,15 @@ const TakeAssessment = () => {
       let totalScore = 0;
       const answersArray = Object.entries(answers).map(([index, selectedOption]) => {
         const question = assessment.questions[index];
-        const isCorrect = selectedOption === Number(question.correctOption);
+        const correctAnswerText = typeof question.correctAnswer === 'number' 
+          ? question.options[question.correctAnswer]
+          : question.correctAnswer;
+        const studentAnswerText = question.options[selectedOption];
+        const isCorrect = studentAnswerText === correctAnswerText;
         if (isCorrect) {
           totalScore += Math.floor(assessment.maxScore / assessment.questions.length);
         }
-        return question.options[selectedOption];
+        return studentAnswerText;
       });
 
       const resultData = {
@@ -301,12 +305,20 @@ const TakeAssessment = () => {
                     }
 
                     const studentAnswer = result.studentAnswers?.[index];
-                    const correctAnswerText = question.options[question.correctOption];
+                    const correctAnswerText = typeof question.correctAnswer === 'number' 
+                      ? question.options[question.correctAnswer]
+                      : question.correctAnswer;
                     const isCorrect = studentAnswer === correctAnswerText;
                     
                     return (
                       <div key={index} className={`mb-4 p-4 border rounded ${isCorrect ? 'bg-green-50' : 'bg-red-50'}`}>
-                        <p className="font-medium mb-2">Question {index + 1}: {question.questionText}</p>
+                        <p className="font-medium mb-2">
+                          Question {index + 1}: {question.question || question.questionText || question.text || 
+                            (typeof question === 'string' ? question : null)}
+                          <span className="text-sm text-gray-500 ml-2">
+                            ({Math.floor(assessment.maxScore / assessment.questions.length)} points)
+                          </span>
+                        </p>
                         <div className="ml-4">
                           <p className="text-gray-600">
                             Your answer: {studentAnswer || 'No answer'}
@@ -398,7 +410,10 @@ const TakeAssessment = () => {
               return (
                 <div key={qIndex} className="border rounded-lg p-4">
                   <div className="flex justify-between items-start mb-4">
-                    <p className="font-medium">Question {qIndex + 1}: {question.questionText}</p>
+                    <p className="font-medium">
+                      Question {qIndex + 1}: {question.question || question.questionText || question.text || 
+                        (typeof question === 'string' ? question : null)}
+                    </p>
                     <span className="text-sm text-gray-500">
                       ({Math.floor(assessment.maxScore / assessment.questions.length)} points)
                     </span>

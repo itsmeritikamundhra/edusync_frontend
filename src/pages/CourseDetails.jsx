@@ -21,7 +21,6 @@ const CourseDetails = () => {
     options: ['', '', '', ''],
     correctOption: 0
   });
-  const [showViewAssessments, setShowViewAssessments] = useState(false);
   const [editingAssessment, setEditingAssessment] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
@@ -604,17 +603,34 @@ const CourseDetails = () => {
                 </div>
               </div>
               {course?.mediaUrl && (
-                <a
-                  href={course.mediaUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-4 md:mt-0 inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
-                >
-                  <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                  </svg>
-                  View Course Media
-                </a>
+                <div className="mb-4">
+                  {/* Show image preview if it's an image */}
+                  {course.mediaUrl.match(/\.(jpeg|jpg|gif|png|webp)$/i) ? (
+                    <img src={course.mediaUrl} alt="Course Media" style={{ maxWidth: 300, maxHeight: 200 }} />
+                  ) : course.mediaUrl.match(/\.pdf$/i) ? (
+                    <a
+                      href={course.mediaUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-2 px-4 py-2 bg-red-50 border border-red-200 rounded hover:bg-red-100 transition"
+                    >
+                      <img src="/pdf-icon.png" alt="PDF" className="w-8 h-8" onError={e => e.target.style.display='none'} />
+                      <span className="text-red-700 font-semibold">View PDF</span>
+                    </a>
+                  ) : (
+                    <a
+                      href={course.mediaUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-4 md:mt-0 inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
+                    >
+                      <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                      View Course Media
+                    </a>
+                  )}
+                </div>
               )}
             </div>
           </div>
@@ -670,27 +686,15 @@ const CourseDetails = () => {
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold text-gray-900">Assessments</h2>
               {userRole === 'Instructor' && isOwnCourse && !showCreateAssessment && (
-                <div className="space-x-4">
-                  <button
-                    onClick={() => setShowCreateAssessment(true)}
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
-                  >
-                    <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                    </svg>
-                    Create Assessment
-                  </button>
-                  <button
-                    onClick={() => setShowViewAssessments(true)}
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200"
-                  >
-                    <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                    View All Assessments
-                  </button>
-                </div>
+                <button
+                  onClick={() => setShowCreateAssessment(true)}
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors duration-200"
+                >
+                  <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                  Create Assessment
+                </button>
               )}
             </div>
 

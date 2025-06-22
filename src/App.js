@@ -8,6 +8,7 @@ import CourseDetails from './pages/CourseDetails';
 import AssessmentResults from './pages/AssessmentResults';
 import TakeAssessment from './pages/TakeAssessment';
 import EditCourse from './pages/EditCourse';
+import Assessments from './pages/Assessments';
 import { isAuthenticated } from './utils/auth';
 import './App.css';
 
@@ -140,6 +141,17 @@ function App() {
           element={
             <AuthGuard>
               <TakeAssessment />
+            </AuthGuard>
+          }
+        />
+
+        <Route
+          path="/assessments"
+          element={
+            <AuthGuard>
+              <RoleBasedRoute allowedRole="Instructor">
+                <Assessments />
+              </RoleBasedRoute>
             </AuthGuard>
           }
         />

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="600" viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background laptop screen -->
+  <rect x="200" y="100" width="400" height="300" fill="#E6F3FF" rx="20"/>
+  
+  <!-- Laptop base -->
+  <path d="M150 400 L650 400 L700 500 L100 500 Z" fill="#2B4C7E"/>
+  
+  <!-- Graduate character -->
+  <g transform="translate(300,200)">
+    <!-- Graduation cap -->
+    <rect x="-20" y="-40" width="40" height="10" fill="#1A1A1A"/>
+    <path d="M-30 -40 L0 -60 L30 -40 Z" fill="#1A1A1A"/>
+    <circle cx="0" cy="-45" r="5" fill="#FFD700"/>
+    
+    <!-- Head -->
+    <circle cx="0" cy="0" r="30" fill="#FFB6C1"/>
+    
+    <!-- Body -->
+    <rect x="-25" y="30" width="50" height="60" fill="#4169E1"/>
+    
+    <!-- Arms -->
+    <rect x="-40" y="40" width="15" height="40" fill="#4169E1"/>
+    <rect x="25" y="40" width="15" height="40" fill="#4169E1"/>
+    
+    <!-- Laptop -->
+    <rect x="-40" y="90" width="80" height="50" fill="#A9A9A9"/>
+  </g>
+  
+  <!-- Decorative plants -->
+  <g transform="translate(150,150)">
+    <path d="M0 0 Q10 -20 20 0 Q30 -20 40 0" stroke="#90EE90" fill="none" stroke-width="3"/>
+    <rect x="15" y="0" width="10" height="20" fill="#CD853F"/>
+  </g>
+  <g transform="translate(600,150)">
+    <path d="M0 0 Q10 -20 20 0 Q30 -20 40 0" stroke="#90EE90" fill="none" stroke-width="3"/>
+    <rect x="15" y="0" width="10" height="20" fill="#CD853F"/>
+  </g>
+</svg> 

@@ -17,6 +17,11 @@ const MyCourses = () => {
     description: '',
     mediaUrl: ''
   });
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [fileUploadError, setFileUploadError] = useState('');
+  const [fileUploaded, setFileUploaded] = useState(false);
+  const [fileName, setFileName] = useState('');
 
   useEffect(() => {
     const role = localStorage.getItem('userRole');
@@ -33,8 +38,8 @@ const MyCourses = () => {
       }
 
       const endpoint = userRole === 'instructor' 
-        ? `${API_URL}/api/Courses/instructor`
-        : `${API_URL}/api/Courses/student`;
+        ? $`{API_URL}/api/Courses/instructor`
+        : $`{API_URL}/api/Courses/student`;
 
       const response = await fetch(endpoint, {
         headers: {
@@ -62,7 +67,7 @@ const MyCourses = () => {
     e.preventDefault();
     
     if (newCourse.description.length > MAX_DESCRIPTION_LENGTH) {
-      setError(`Description cannot exceed ${MAX_DESCRIPTION_LENGTH} characters`);
+      setError('Description cannot exceed ${MAX_DESCRIPTION_LENGTH} characters');
       return;
     }
     
@@ -72,14 +77,18 @@ const MyCourses = () => {
         navigate('/login');
         return;
       }
-
-      const response = await fetch(`${API_URL}/api/Courses`, {
+      console.log('Creating course with:', newCourse);
+      const response = await fetch($`{API_URL}/api/Courses`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(newCourse)
+        body: JSON.stringify({
+          title: newCourse.title,
+          description: newCourse.description,
+          mediaUrl: newCourse.mediaUrl || ""
+        })
       });
 
       if (!response.ok) {
@@ -95,7 +104,7 @@ const MyCourses = () => {
     } catch (err) {
       setError(err.message);
     }
-  };
+  }
 
   const handleDeleteCourse = async (courseId) => {
     if (!window.confirm('Are you sure you want to delete this course?')) {
@@ -104,7 +113,7 @@ const MyCourses = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${API_URL}/api/Courses/${courseId}`, {
+      const response = await fetch($`{API_URL}/api/Courses/${courseId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -119,6 +128,46 @@ const MyCourses = () => {
     } catch (err) {
       setError(err.message);
     }
+  };
+
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setFileUploadError('');
+    setUploading(true);
+    setFileName(file.name);
+    try {
+      const token = localStorage.getItem('token');
+      const formData = new FormData();
+      formData.append('file', file);
+      const response = await fetch(`${API_URL}/api/FileUpload/upload`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'File upload failed');
+      }
+      const data = await response.json();
+      console.log('File upload response:', data);
+      setNewCourse((prev) => ({ ...prev, mediaUrl: data.FileUrl }));
+      setFileUploaded(true);
+    } catch (err) {
+      setFileUploadError(err.message || 'File upload failed');
+      setNewCourse((prev) => ({ ...prev, mediaUrl: '' }));
+      setFileUploaded(false);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDirectUrlChange = (e) => {
+    setNewCourse({ ...newCourse, mediaUrl: e.target.value });
+    setFileUploaded(false);
+    setFileName('');
   };
 
   if (loading) {
@@ -181,6 +230,8 @@ const MyCourses = () => {
                   >
                     View Details
                   </button>
+                  {/* Debug display for mediaUrl */}
+                  <div style={{ fontSize: '0.8em', color: '#888' }}>DEBUG mediaUrl: {course.mediaUrl}</div>
                   {userRole === 'instructor' && (
                     <>
                       <button
@@ -244,13 +295,38 @@ const MyCourses = () => {
                   </div>
                 </div>
                 <div>
-                  <label className="block mb-1">Media URL (Optional):</label>
-                  <input
-                    type="url"
-                    value={newCourse.mediaUrl}
-                    onChange={(e) => setNewCourse({ ...newCourse, mediaUrl: e.target.value })}
-                    className="w-full p-2 border rounded"
-                  />
+                  <label className="block mb-1">Course Media (choose one):</label>
+                  <div className="flex flex-col gap-2">
+                    <input
+                      type="file"
+                      accept="*"
+                      disabled={!!newCourse.mediaUrl && !fileUploaded}
+                      onChange={handleFileChange}
+                      className="w-full p-2 border rounded"
+                    />
+                    {uploading && (
+                      <div className="text-blue-500 text-sm">Uploading... {fileName}</div>
+                    )}
+                    {fileUploadError && (
+                      <div className="text-red-500 text-sm">{fileUploadError}</div>
+                    )}
+                    {fileUploaded && newCourse.mediaUrl && (
+                      <div className="text-green-600 text-sm">
+                        File uploaded: <a href={newCourse.mediaUrl} target="_blank" rel="noopener noreferrer" className="underline">{fileName}</a>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-500 text-xs">or</span>
+                      <input
+                        type="url"
+                        placeholder="Paste direct media URL"
+                        value={fileUploaded ? '' : newCourse.mediaUrl}
+                        onChange={handleDirectUrlChange}
+                        className="w-full p-2 border rounded"
+                        disabled={fileUploaded}
+                      />
+                    </div>
+                  </div>
                 </div>
                 <div className="flex justify-end gap-2">
                   <button
@@ -263,6 +339,7 @@ const MyCourses = () => {
                   <button
                     type="submit"
                     className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                    disabled={uploading}
                   >
                     Create Course
                   </button>
@@ -276,4 +353,4 @@ const MyCourses = () => {
   );
 };
 
-export default MyCourses; 
+export default MyCourses;

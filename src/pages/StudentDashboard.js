@@ -177,17 +177,20 @@ const StudentDashboard = () => {
                 <div key={course.id} className="border rounded-lg p-4 bg-white shadow">
                   <h3 className="font-semibold mb-2">{course.title}</h3>
                   <p className="text-gray-600 mb-4">{course.description}</p>
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center space-x-2">
                     <button
                       onClick={() => navigate(`/course/${course.id}`)}
-                      className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                      className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors duration-200"
                     >
                       View Course
                     </button>
                     <button
                       onClick={() => handleUnenroll(course.id)}
-                      className="text-red-500 hover:text-red-600"
+                      className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors duration-200 flex items-center"
                     >
+                      <svg className="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                      </svg>
                       Unenroll
                     </button>
                   </div>

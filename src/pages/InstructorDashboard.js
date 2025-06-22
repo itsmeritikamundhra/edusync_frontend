@@ -13,6 +13,11 @@ const InstructorDashboard = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [fileUploadError, setFileUploadError] = useState('');
+  const [fileUploaded, setFileUploaded] = useState(false);
+  const [fileName, setFileName] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -169,6 +174,12 @@ const InstructorDashboard = () => {
     e.preventDefault();
     setError('');
 
+    // Prevent submission if mediaUrl is empty
+    if (!newCourse.mediaUrl || newCourse.mediaUrl.trim() === "") {
+      setError("Please upload a file or provide a direct media URL before creating the course.");
+      return;
+    }
+
     try {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -184,7 +195,11 @@ const InstructorDashboard = () => {
           'Accept': 'application/json'
         },
         credentials: 'include', // Include cookies if any
-        body: JSON.stringify(newCourse)
+        body: JSON.stringify({
+          title: newCourse.title,
+          description: newCourse.description,
+          mediaUrl: newCourse.mediaUrl || ""
+        })
       });
 
       if (!response.ok) {
@@ -254,6 +269,46 @@ const InstructorDashboard = () => {
     navigate(`/edit-course/${courseId}`);
   };
 
+  const handleFileChange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    setFileUploadError('');
+    setUploading(true);
+    setFileName(file.name);
+    try {
+      const token = localStorage.getItem('token');
+      const formData = new FormData();
+      formData.append('file', file);
+      const response = await fetch(`${API_URL}/api/FileUpload/upload`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'File upload failed');
+      }
+      const data = await response.json();
+      setNewCourse((prev) => ({ ...prev, mediaUrl: data.fileUrl }));
+      setFileUploaded(true);
+    } catch (err) {
+      setFileUploadError(err.message || 'File upload failed');
+      
+      setNewCourse((prev) => ({ ...prev, mediaUrl: '' }));
+      setFileUploaded(false);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDirectUrlChange = (e) => {
+    setNewCourse({ ...newCourse, mediaUrl: e.target.value });
+    setFileUploaded(false);
+    setFileName('');
+  };
+
   if (loading) {
     return (
       <>
@@ -269,12 +324,14 @@ const InstructorDashboard = () => {
       <div className="container mx-auto p-4">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">My Courses</h1>
-          <button
-            onClick={() => setShowCreateForm(true)}
-            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-          >
-            Create Course
-          </button>
+          <div className="flex gap-4">
+            <button
+              onClick={() => setShowCreateForm(true)}
+              className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+            >
+              Create Course
+            </button>
+          </div>
         </div>
         
         {error && (
@@ -318,14 +375,37 @@ const InstructorDashboard = () => {
                 />
               </div>
               <div>
-                <label className="block mb-1">Media URL:</label>
-                <input
-                  type="url"
-                  value={newCourse.mediaUrl}
-                  onChange={(e) => setNewCourse({ ...newCourse, mediaUrl: e.target.value })}
-                  className="w-full p-2 border rounded"
-                  placeholder="https://example.com/course-media"
-                />
+                <label className="block mb-1">Course Media (choose one):</label>
+                <div className="flex flex-col gap-2">
+                  <input
+                    type="file"
+                    accept="*"
+                    disabled={!!newCourse.mediaUrl && !fileUploaded}
+                    onChange={handleFileChange}
+                    className="w-full p-2 border rounded"
+                  />
+                  {uploading && (
+                    <div className="text-blue-500 text-sm">Uploading... {fileName}</div>
+                  )}
+                  {fileUploadError && (
+                    <div className="text-red-500 text-sm">{fileUploadError}</div>
+                  )}
+                  {fileUploaded && newCourse.mediaUrl && (
+                    <div className="text-green-600 text-sm">
+                      File uploaded: <a href={newCourse.mediaUrl} target="_blank" rel="noopener noreferrer" className="underline">{fileName}</a>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2">
+                    <span className="text-gray-500 text-xs">or</span>
+                    <input
+                      type="url"
+                      placeholder="Paste direct media URL"
+                      value={newCourse.mediaUrl}
+                      onChange={handleDirectUrlChange}
+                      className="w-full p-2 border rounded"
+                    />
+                  </div>
+                </div>
               </div>
               <div className="flex justify-end space-x-2">
                 <button
@@ -338,6 +418,11 @@ const InstructorDashboard = () => {
                 <button
                   type="submit"
                   className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                  disabled={
+                    uploading ||
+                    !newCourse.mediaUrl ||
+                    newCourse.mediaUrl.trim() === ""
+                  }
                 >
                   Create
                 </button>
